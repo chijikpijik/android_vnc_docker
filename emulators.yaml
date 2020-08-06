@@ -1,0 +1,62 @@
+---
+# Source: openstf/templates/emulators.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phone-27
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  selector:
+    matchLabels:
+      app: phone-27
+  template:
+    metadata:
+      labels:
+        app: phone-27
+    spec:
+      shareProcessNamespace: true
+      containers:
+        - name: emulator
+          image: dcr-old.qiwi.com/tt5:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5900
+            - containerPort: 5901
+            - containerPort: 5902
+          env:
+            - name: ANDROID_ARCH
+              value: "x86"
+            - name: NAME
+              value: "android-27"
+            - name: CONSOLE_PORT
+              value: "10000"
+            - name: ADB_PORT
+              value: "10001"
+            - name: ADB_SERVER_PORT
+              value: "9999"
+            - name: ANDROID_CONFIG
+              value: ""
+          resources:
+            limits:
+              cpu: 2
+            requests:
+              cpu: 1
+          securityContext:
+              privileged: false
+          livenessProbe:
+            exec:
+              command:
+              - "/bin/sh"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+              - "/bin/sh"
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 2
